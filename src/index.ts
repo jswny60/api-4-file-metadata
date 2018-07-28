@@ -1,4 +1,6 @@
 import express = require('express');
+import fileUpload = require('express-fileupload');
+import { UploadedFile } from 'express-fileupload';
 
 interface MetadataResult {
   name: string;
@@ -7,18 +9,24 @@ interface MetadataResult {
 }
 
 
-function getMetadata(req: express.Request): MetadataResult {
+function getMetadata(file: UploadedFile): MetadataResult {
   return {
-    name: '',
-    type: '',
-    size: 0,
+    name: file.name,
+    type: file.mimetype,
+    size: file.data.length,
   }
 }
 
 const app = express();
 
-app.get('/api/fileanalyse/', (req, res) => {
-  const result = getMetadata(req);
+app.use(fileUpload())
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
+
+app.post('/api/fileanalyse/', (req, res) => {
+  const result = getMetadata(req.files.fileUpload as UploadedFile);
   res.send(result);
 });
 
